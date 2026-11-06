@@ -1,5 +1,9 @@
 import streamlit as st
 
+from langgraph_backend import chatbot
+
+config = {"configurable": {"thread_id": "user-2"}}
+
 if 'message_history' not in st.session_state:
      st.session_state['message_history'] = []
 
@@ -11,11 +15,23 @@ for message in st.session_state['message_history']:
 
 
 if user_input:
+        
         #first add thr message to message_history
         st.session_state['message_history'].append({'role':'user' , 'content':user_input})
         with st.chat_message("user"):
             st.markdown(user_input)
-        #first add thr message to message_history
-        st.session_state['message_history'].append({'role':'assistant' , 'content':user_input})
+
+        def stream_response():
+            for chunk, metadata in chatbot.stream(
+                {'messages': [user_input]}, 
+                config=config, 
+                stream_mode="messages"
+            ):
+                if chunk.content:
+                    yield chunk.content
+
+    # 3. Stream response live to the UI and store full text in session history
         with st.chat_message("assistant"):
-            st.markdown(user_input)
+            full_response = st.write_stream(stream_response)
+
+        st.session_state['message_history'].append({'role': 'assistant', 'content': full_response})
