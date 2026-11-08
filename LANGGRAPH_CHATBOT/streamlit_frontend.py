@@ -9,7 +9,7 @@ from langgraph_backend import chatbot
 
 
 
-config = {"configurable": {"thread_id": "user-2"}}
+config = {"configurable": {"thread_id": "user-000"}}
 
 if 'message_history' not in st.session_state:
      st.session_state['message_history'] = []
